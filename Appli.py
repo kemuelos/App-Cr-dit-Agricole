@@ -7,6 +7,7 @@ from turtle import left, right
 from webbrowser import get 
 import qrcode
 from PIL import Image
+import csv 
 
     
 
@@ -86,7 +87,7 @@ label.pack()
 
 #creer frame (boite)
 frame_1 = Frame(window, background="#FFFFFF")
-frame_2 = Frame(window,background="#FFFFFF")
+frame_2 = Frame(window,background="#006C50")
 frame_3 = Frame(window,background="#FFFFFF")
 
 
@@ -119,19 +120,28 @@ bouton_2.pack()
 
 #boutons frame 2
 txt_nom = Label(frame_2, text="Nom", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_nom.place(x=1000, y=220)
-txt_nom.pack()
+txt_nom.pack(padx=5, pady=15, side=LEFT)
+champ_nom = Entry(frame_2)
+champ_nom.pack(padx= 10, pady=15, side=LEFT)
 
-# txt_prenom = Label(frame_2, text="Prénom", font=("Arial"), bg="#FFFFFF", fg="black")
-# txt_prenom.pack()
+txt_prenom = Label(frame_2, text="Prénom", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_prenom.pack(padx=10, pady=15, side=LEFT)
+champ_prenom = Entry(frame_2)
+champ_prenom.pack(padx=15, pady=15, side=LEFT)
 
-# txt_agence = Label(frame_2, text="Agence", font=("Arial"), bg="#FFFFFF", fg="black")
-# txt_agence.pack()
+txt_agence = Label(frame_2, text="Agence", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_agence.pack(padx=15, pady=15, side=LEFT)
+champ_agence = Entry(frame_2)
+champ_agence.pack(padx= 20, pady= 15, side=LEFT)
 
+txt_poste = Label(frame_2, text="Poste", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_poste.pack(padx= 23, pady= 15, side=LEFT)
+champ_poste = Entry(frame_2)
+champ_poste.pack(padx=40, pady= 15, side=LEFT)
 
 
 bouton_5 = Button(frame_2, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_2to1)
-bouton_5.pack()
+bouton_5.pack(pady=15, side=LEFT)
 
 
 

@@ -8,7 +8,8 @@ from turtle import left, right
 from webbrowser import get 
 import qrcode
 from PIL import Image
-import csv 
+import csv
+import tkinter 
 
     
 
@@ -53,7 +54,9 @@ def page_2():
     frame_1.pack_forget()
     frame_quitter.pack_forget()
     frame_2.pack()
+    frame_csv.pack()
     frame_4.pack()
+    
 
 def page_3():
     frame_1.pack_forget()
@@ -65,8 +68,11 @@ def page_3():
 def page_2to1():
     frame_2.pack_forget()
     frame_4.pack_forget()
+    frame_csv.pack_forget()
     frame_1.pack()
     frame_quitter.pack()
+    
+    
 
 def page_3to1():
     frame_3.pack_forget()
@@ -74,8 +80,6 @@ def page_3to1():
     frame_quitter.pack()
 
 
-
-            
 
 
 #crer fenetre
@@ -98,6 +102,7 @@ frame_2 = Frame(window,background="#006C50")
 frame_3 = Frame(window,background="#FFFFFF")
 frame_4 = Frame(window,background="#FFFFFF")
 frame_quitter = Frame(window,background="#FFFFFF")
+frame_csv = Frame(window, background="#FFFFFF")
 
 
 #affichage de la frame
@@ -177,6 +182,12 @@ bouton_6.pack()
 
 bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_3to1)
 bouton_7.pack()
+
+
+base = csv.reader(open("Classeur1.csv"))
+for indice, row in enumerate(base):
+    txt1  = Label(frame_csv,text=row[0])
+    txt1.grid(row=indice, column=1)
 
 
 #affichage de la fenetre 

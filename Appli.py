@@ -1,4 +1,5 @@
 from cProfile import label
+from cgitb import text
 import tkinter as tk 
 from tkinter import * 
 from tkinter import font
@@ -50,21 +51,27 @@ def supp():
 #fonction pour passer à la page suivante
 def page_2():
     frame_1.pack_forget()
+    frame_quitter.pack_forget()
     frame_2.pack()
+    frame_4.pack()
 
 def page_3():
     frame_1.pack_forget()
+    frame_quitter.pack_forget()
     frame_3.pack()
     
 
 #revenir à la page précédente     
 def page_2to1():
     frame_2.pack_forget()
+    frame_4.pack_forget()
     frame_1.pack()
+    frame_quitter.pack()
 
 def page_3to1():
     frame_3.pack_forget()
     frame_1.pack()
+    frame_quitter.pack()
 
 
 
@@ -89,10 +96,13 @@ label.pack()
 frame_1 = Frame(window, background="#FFFFFF")
 frame_2 = Frame(window,background="#006C50")
 frame_3 = Frame(window,background="#FFFFFF")
+frame_4 = Frame(window,background="#FFFFFF")
+frame_quitter = Frame(window,background="#FFFFFF")
 
 
 #affichage de la frame
 frame_1.pack()
+frame_quitter.pack()
 
 
 
@@ -113,7 +123,7 @@ bouton_1.pack()
 bouton_2 = Button(frame_1, text="Générer un QR Code événementiel", font=("Arial"), bg ='#006C50', fg='white', command=page_3)
 bouton_2.pack()
 
-bouton_2 = Button(frame_1, text="Quitter", font=("Arial"), bg ='#ED1C24', fg='white', command=window.quit)
+bouton_2 = Button(frame_quitter, text="Quitter", font=("Arial"), bg ='#ED1C24', fg='white', command=window.quit)
 bouton_2.pack()
 
 
@@ -125,28 +135,33 @@ champ_nom = Entry(frame_2)
 champ_nom.pack(padx= 10, pady=15, side=LEFT)
 
 txt_prenom = Label(frame_2, text="Prénom", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_prenom.pack(padx=10, pady=15, side=LEFT)
+txt_prenom.pack(padx=5, pady=15, side=LEFT)
 champ_prenom = Entry(frame_2)
-champ_prenom.pack(padx=15, pady=15, side=LEFT)
+champ_prenom.pack(padx=10, pady=15, side=LEFT)
 
 txt_agence = Label(frame_2, text="Agence", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_agence.pack(padx=15, pady=15, side=LEFT)
+txt_agence.pack(padx=5, pady=15, side=LEFT)
 champ_agence = Entry(frame_2)
-champ_agence.pack(padx= 20, pady= 15, side=LEFT)
+champ_agence.pack(padx= 10, pady= 15, side=LEFT)
 
 txt_poste = Label(frame_2, text="Poste", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_poste.pack(padx= 23, pady= 15, side=LEFT)
+txt_poste.pack(padx= 5, pady= 15, side=LEFT)
 champ_poste = Entry(frame_2)
-champ_poste.pack(padx=40, pady= 15, side=LEFT)
+champ_poste.pack(padx=10, pady= 15, side=LEFT)
+
+bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white')
+bouton_8.pack(padx=10, pady=15, side=LEFT)
 
 
-bouton_5 = Button(frame_2, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_2to1)
-bouton_5.pack(pady=15, side=LEFT)
+
+bouton_5 = Button(frame_4, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_2to1)
+bouton_5.pack()
+
 
 
 
 #boutons frame 3
-txt_lien = Label(frame_3, text="Entrez le lien  : ", font=("Arial"), bg ='#006C50', fg='black')
+txt_lien = Label(frame_3, text="Entrez le lien  : ", font=("Arial"), bg ='#006C50', fg='white')
 champ_lien = Entry(frame_3)
 txt_lien.pack()
 champ_lien.pack()
@@ -154,17 +169,14 @@ champ_lien.pack()
 
 
 
-bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='black', command= QR_code)
+bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='white', command= QR_code)
 bouton_6.pack()
 
 
 
 
-bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='black', command=page_3to1)
+bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_3to1)
 bouton_7.pack()
-
-
-
 
 
 #affichage de la fenetre 

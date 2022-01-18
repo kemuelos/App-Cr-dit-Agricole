@@ -1,14 +1,19 @@
 from cProfile import label
 from cgitb import text
+from heapq import heappush
+from textwrap import fill
 import tkinter as tk 
 from tkinter import * 
 from tkinter import font
-from turtle import left, right
+from turtle import heading, left, right
 from webbrowser import get 
 import qrcode
 from PIL import Image
 import csv
-import tkinter 
+import tkinter
+import tkinter as ttk
+from tkinter import ttk
+
 
 
     
@@ -103,8 +108,37 @@ frame_3 = Frame(window,background="#FFFFFF")
 frame_4 = Frame(window,background="#FFFFFF")
 frame_quitter = Frame(window,background="#FFFFFF")
 
-frame_csv = Frame(window, background="#FFFFFF")
-frame_csv.pack_propagate(False)
+
+
+#frame qui affiche le csv
+frame_csv = Frame(window, bd=5,relief= GROOVE, bg="#FFFFFF", width=1020, height=610)
+
+scroll = Scrollbar(frame_csv, orient=VERTICAL)
+tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "eds", "service", "domaine"), xscrollcommand=scroll.set)
+
+scroll.pack(side=RIGHT)
+tab_info.heading("id", text="Login")
+tab_info.heading("nom", text="Nom")
+tab_info.heading("prenom", text="Prenom")
+tab_info.heading("eds", text="EDS")
+tab_info.heading("service", text="Service/Agence")
+tab_info.heading("domaine", text="Domaine/Metier")
+
+tab_info.column("id", width=100)
+tab_info.column("nom", width=150)
+tab_info.column("prenom", width=150)
+tab_info.column("eds", width=150)
+tab_info.column("service", width=150)
+tab_info.column("domaine", width=300)
+
+tab_info["show"] = "headings"
+tab_info.pack()
+tab_info.bind("<ButtonRelease-1")
+
+base = csv.reader(open("base.csv"))
+tab_info.insert(base[0])
+
+
 
 
 #affichage de la frame
@@ -186,14 +220,6 @@ bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='whi
 bouton_7.pack()
 
 
-base = csv.reader(open("base.csv"))
-for indice, row in enumerate(base):
-    txt1  = Label(frame_csv,text=row[0])
-    txt1.grid(row=indice, column=1)
-
-
-scrollbar = Scrollbar(frame_csv)
-scrollbar.pack(side=RIGHT)
 
 #affichage de la fenetre 
 window.mainloop()

@@ -3,13 +3,13 @@ from cgitb import text
 import tkinter as tk 
 from tkinter import * 
 from tkinter import font
-from tkinter.tix import COLUMN
 from turtle import left, right
 from webbrowser import get 
 import qrcode
 from PIL import Image
 import csv
 import tkinter 
+
 
     
 
@@ -102,7 +102,9 @@ frame_2 = Frame(window,background="#006C50")
 frame_3 = Frame(window,background="#FFFFFF")
 frame_4 = Frame(window,background="#FFFFFF")
 frame_quitter = Frame(window,background="#FFFFFF")
+
 frame_csv = Frame(window, background="#FFFFFF")
+frame_csv.pack_propagate(False)
 
 
 #affichage de la frame
@@ -184,11 +186,14 @@ bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='whi
 bouton_7.pack()
 
 
-base = csv.reader(open("Classeur1.csv"))
+base = csv.reader(open("base.csv"))
 for indice, row in enumerate(base):
     txt1  = Label(frame_csv,text=row[0])
     txt1.grid(row=indice, column=1)
 
+
+scrollbar = Scrollbar(frame_csv)
+scrollbar.pack(side=RIGHT)
 
 #affichage de la fenetre 
 window.mainloop()

@@ -1,6 +1,10 @@
 from cProfile import label
 from cgitb import text
+import email
 from heapq import heappush
+from os import sep
+from re import A
+from sqlite3 import Row
 from textwrap import fill
 import tkinter as tk 
 from tkinter import * 
@@ -13,6 +17,7 @@ import csv
 import tkinter
 import tkinter as ttk
 from tkinter import ttk
+import pandas as pd
 
 
 
@@ -87,6 +92,7 @@ def page_3to1():
 
 
 
+
 #crer fenetre
 window = Tk()
 window.title("Qr Generateur")
@@ -111,33 +117,54 @@ frame_quitter = Frame(window,background="#FFFFFF")
 
 
 #frame qui affiche le csv
-frame_csv = Frame(window, bd=5,relief= GROOVE, bg="#FFFFFF", width=1020, height=610)
+frame_csv = Frame(window, bd=3,relief= GROOVE, bg="#FFFFFF", width=1080, height=550)
+frame_csv.pack_propagate(False)
 
-scroll = Scrollbar(frame_csv, orient=VERTICAL)
-tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "eds", "service", "domaine"), xscrollcommand=scroll.set)
 
-scroll.pack(side=RIGHT)
+#Tableau qui stock le csv
+scroll_x = Scrollbar(frame_csv, orient=HORIZONTAL)
+scroll_y = Scrollbar(frame_csv, orient=VERTICAL)
+tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "eds", "service", "domaine", "mail"), xscrollcommand=scroll_x.set, yscrollcommand=scroll_y.set)
+scroll_y.config(command=tab_info.yview)
+scroll_y.pack(side=RIGHT, fill=Y)
+scroll_x.config(command=tab_info.xview)
+scroll_x.pack(side=BOTTOM, fill=X)
+
 tab_info.heading("id", text="Login")
 tab_info.heading("nom", text="Nom")
 tab_info.heading("prenom", text="Prenom")
 tab_info.heading("eds", text="EDS")
 tab_info.heading("service", text="Service/Agence")
 tab_info.heading("domaine", text="Domaine/Metier")
+tab_info.heading("mail", text="Mail")
 
-tab_info.column("id", width=100)
-tab_info.column("nom", width=150)
-tab_info.column("prenom", width=150)
-tab_info.column("eds", width=150)
-tab_info.column("service", width=150)
-tab_info.column("domaine", width=300)
+tab_info.column("#0", minwidth=0,width=0)
+tab_info.column('#1', width=100) #id
+tab_info.column('#2', minwidth=0,width=120) #nom
+tab_info.column('#3', minwidth=0,width=100) #prenom
+tab_info.column('#4', minwidth=0,width=100) #eds
+tab_info.column('#5', minwidth=0,width=150) #service
+tab_info.column('#6', minwidth=0,width=150) #domaine
+tab_info.column('#7', minwidth=0,width=320) #mail
+tab_info.pack(expand=YES, fill=BOTH)
 
-tab_info["show"] = "headings"
-tab_info.pack()
-tab_info.bind("<ButtonRelease-1")
 
-base = csv.reader(open("base.csv"))
-tab_info.insert(base[0])
+with open('base.csv') as f:
+    reader = csv.DictReader(f, delimiter = ';')
+    for row in reader:
+        login = row['Login']
+        name = row['Nom']
+        firstname = row['Prenom']
+        eds = row['EDS']
+        service = row['SERVICE/AGENCE']
+        domaine = row['Domaine_metier']
+        mail = row['Mail']
+        tab_info.insert("", 0, values=(login, name, firstname, eds, service, domaine, mail))
 
+
+
+
+        
 
 
 

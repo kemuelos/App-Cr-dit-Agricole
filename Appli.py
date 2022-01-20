@@ -1,15 +1,17 @@
+from ast import Return
 from cProfile import label
 from cgitb import text
 import email
 from heapq import heappush
 from os import sep
 from re import A
+from select import select
 from sqlite3 import Row
 from textwrap import fill
 import tkinter as tk 
 from tkinter import * 
 from tkinter import font
-from turtle import heading, left, right
+from turtle import bgcolor, heading, left, right
 from webbrowser import get 
 import qrcode
 from PIL import Image
@@ -18,6 +20,10 @@ import tkinter
 import tkinter as ttk
 from tkinter import ttk
 import pandas as pd
+import vobject
+import segno
+from segno import helpers
+import io
 
 
 
@@ -90,7 +96,24 @@ def page_3to1():
     frame_quitter.pack()
 
 
+def select_line():
+    line = tab_info.item(tab_info.selection())
+    item = tab_info.selection()[0]
+    # print(tab_info.item(item)['values'])
+    # print(line['values'][1])
+    Nom = line['values'][1] +' ' + line['values'][2]
+    Email = line['values'][6]
+    print(Nom)
 
+    
+    qr = helpers.make_mecard(name = Nom, email= Email)
+    qr.designator
+    qr.save('my_contact.png', scale=4, data_dark='#006C50', dark='#006C50')
+    
+
+
+
+    
 
 
 #crer fenetre
@@ -122,13 +145,12 @@ frame_csv.pack_propagate(False)
 
 
 #Tableau qui stock le csv
-scroll_x = Scrollbar(frame_csv, orient=HORIZONTAL)
+
 scroll_y = Scrollbar(frame_csv, orient=VERTICAL)
-tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "eds", "service", "domaine", "mail"), xscrollcommand=scroll_x.set, yscrollcommand=scroll_y.set)
+tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "eds", "service", "domaine", "mail"), yscrollcommand=scroll_y.set)
 scroll_y.config(command=tab_info.yview)
 scroll_y.pack(side=RIGHT, fill=Y)
-scroll_x.config(command=tab_info.xview)
-scroll_x.pack(side=BOTTOM, fill=X)
+
 
 tab_info.heading("id", text="Login")
 tab_info.heading("nom", text="Nom")
@@ -147,6 +169,7 @@ tab_info.column('#5', minwidth=0,width=150) #service
 tab_info.column('#6', minwidth=0,width=150) #domaine
 tab_info.column('#7', minwidth=0,width=320) #mail
 tab_info.pack(expand=YES, fill=BOTH)
+tab_info.bind("<ButtonRelease-1>")
 
 
 with open('base.csv') as f:
@@ -164,7 +187,7 @@ with open('base.csv') as f:
 
 
 
-        
+
 
 
 
@@ -197,6 +220,11 @@ bouton_2.pack()
 
 
 #boutons frame 2
+txt_id= Label(frame_2, text="Id", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_id.pack(padx=5, pady=15, side=LEFT)
+champ_id= Entry(frame_2)
+champ_id.pack(padx= 10, pady=15, side=LEFT)
+
 txt_nom = Label(frame_2, text="Nom", font=("Arial"), bg="#FFFFFF", fg="black")
 txt_nom.pack(padx=5, pady=15, side=LEFT)
 champ_nom = Entry(frame_2)
@@ -206,6 +234,7 @@ txt_prenom = Label(frame_2, text="Prénom", font=("Arial"), bg="#FFFFFF", fg="bl
 txt_prenom.pack(padx=5, pady=15, side=LEFT)
 champ_prenom = Entry(frame_2)
 champ_prenom.pack(padx=10, pady=15, side=LEFT)
+
 
 txt_agence = Label(frame_2, text="Agence", font=("Arial"), bg="#FFFFFF", fg="black")
 txt_agence.pack(padx=5, pady=15, side=LEFT)
@@ -222,8 +251,12 @@ bouton_8.pack(padx=10, pady=15, side=LEFT)
 
 
 
+#boutons frame 4
 bouton_5 = Button(frame_4, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_2to1)
-bouton_5.pack()
+bouton_5.pack(side=RIGHT)
+
+bouton_creer = Button(frame_4, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=select_line)
+bouton_creer.pack(side=LEFT)
 
 
 
@@ -235,16 +268,13 @@ txt_lien.pack()
 champ_lien.pack()
 
 
-
-
 bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='white', command= QR_code)
 bouton_6.pack()
 
 
-
-
 bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_3to1)
 bouton_7.pack()
+
 
 
 

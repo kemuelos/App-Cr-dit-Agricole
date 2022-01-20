@@ -33,7 +33,7 @@ import io
 def QR_code():
     lien = champ_lien.get()
     logo_link = 'ca_guadeloupe.png'
-
+    E = champ_E.get()
     logo = Image.open(logo_link)
 
     basewidth = 100
@@ -57,13 +57,10 @@ def QR_code():
            (QRimg.size[1] - logo.size[1]) // 2)
     QRimg.paste(logo, pos)
 
-    QRimg.save('code.jpeg')
+    QRimg.save('qr_' + E +'.jpeg')
     champ_lien.delete(0,"end")    
     
 
-
-def supp():
-    champ_lien.delete(0, END)
 
 #fonction pour passer à la page suivante
 def page_2():
@@ -96,19 +93,46 @@ def page_3to1():
     frame_quitter.pack()
 
 
-def select_line():
+def page_4():
+    frame_1.pack_forget()
+    frame_quitter.pack_forget()
+    frame_5.pack()
+
+
+def page_4to1():
+    frame_5.pack_forget()
+    frame_1.pack()
+    frame_quitter.pack()
+
+
+def QR_auto():
     line = tab_info.item(tab_info.selection())
     item = tab_info.selection()[0]
     # print(tab_info.item(item)['values'])
     # print(line['values'][1])
     Nom = line['values'][1] +' ' + line['values'][2]
     Email = line['values'][6]
-    print(Nom)
+    
 
     
-    qr = helpers.make_mecard(name = Nom, email= Email)
-    qr.designator
-    qr.save('my_contact.png', scale=4, data_dark='#006C50', dark='#006C50')
+    qr_auto = helpers.make_mecard(name = Nom, email= Email)
+    qr_auto.designator
+    qr_auto.save(Nom + '_qrcode_auto.png', scale=4, data_dark='#006C50', dark='#006C50')
+    
+
+
+def QR_manu():
+    name2 = champ_NOM.get() + ' ' + champ_PRENOM.get()
+    mail2 = champ_MAIL.get()
+    
+    qr_manu =  helpers.make_mecard(name = name2, email= mail2)
+    qr_manu.designator
+    qr_manu.save(name2 + '_qrcode_manuel.png', scale=4, data_dark='#006C50', dark='#006C50')
+    
+    
+    champ_NOM.delete(0,"end")
+    champ_PRENOM.delete(0,"end")  
+    champ_MAIL.delete(0,"end") 
     
 
 
@@ -135,6 +159,7 @@ frame_1 = Frame(window, background="#FFFFFF")
 frame_2 = Frame(window,background="#006C50")
 frame_3 = Frame(window,background="#FFFFFF")
 frame_4 = Frame(window,background="#FFFFFF")
+frame_5 = Frame(window,background="#FFFFFF")
 frame_quitter = Frame(window,background="#FFFFFF")
 
 
@@ -211,11 +236,16 @@ label_subtitle.pack()
 bouton_1 = Button(frame_1, text="Générer un QR Code de contact", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
 bouton_1.pack()
 
+bouton_4 =Button(frame_1, text="Générer un QR code contact manuellement", font=("Arial"), bg='#006C50', fg='white', command=page_4)
+bouton_4.pack()
+
 bouton_2 = Button(frame_1, text="Générer un QR Code événementiel", font=("Arial"), bg ='#006C50', fg='white', command=page_3)
 bouton_2.pack()
 
-bouton_2 = Button(frame_quitter, text="Quitter", font=("Arial"), bg ='#ED1C24', fg='white', command=window.quit)
-bouton_2.pack()
+
+
+bouton_3 = Button(frame_quitter, text="Quitter", font=("Arial"), bg ='#ED1C24', fg='white', command=window.quit)
+bouton_3.pack()
 
 
 
@@ -251,21 +281,26 @@ bouton_8.pack(padx=10, pady=15, side=LEFT)
 
 
 
-#boutons frame 4
+# frame 4
 bouton_5 = Button(frame_4, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_2to1)
 bouton_5.pack(side=RIGHT)
 
-bouton_creer = Button(frame_4, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=select_line)
+bouton_creer = Button(frame_4, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=QR_auto)
 bouton_creer.pack(side=LEFT)
 
 
 
 
-#boutons frame 3
+# frame 3
 txt_lien = Label(frame_3, text="Entrez le lien  : ", font=("Arial"), bg ='#006C50', fg='white')
 champ_lien = Entry(frame_3)
 txt_lien.pack()
 champ_lien.pack()
+
+txt_E = Label(frame_3, text="Entrez le nom de l'évènement : ", font=("Arial"), bg ='#006C50', fg='white')
+champ_E = Entry(frame_3)
+txt_E.pack()
+champ_E.pack()
 
 
 bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='white', command= QR_code)
@@ -276,6 +311,29 @@ bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='whi
 bouton_7.pack()
 
 
+
+# frame 5
+txt_nom = Label(frame_5, text="NOM", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_nom.pack()
+champ_NOM = Entry(frame_5)
+champ_NOM.pack()
+
+txt_prenom = Label(frame_5, text="PRENOM", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_prenom.pack()
+champ_PRENOM = Entry(frame_5)
+champ_PRENOM.pack()
+
+txt_mail = Label(frame_5, text="MAIL", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_mail.pack()
+champ_MAIL = Entry(frame_5)
+champ_MAIL.pack()
+
+bouton_creer2 = Button(frame_5, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=QR_manu)
+bouton_creer2.pack()
+
+
+bouton_7 = Button(frame_5, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_4to1)
+bouton_7.pack()
 
 
 #affichage de la fenetre 

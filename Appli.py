@@ -155,7 +155,32 @@ def QR_manuel():
     champ_LONGITUDE.delete(0, "end")
     
      
+
+def search():
+    nom_search = champ_nom.get()  
+    tab_info.delete(*tab_info.get_children())
+    tab_info.insert("",0,values=(login, name, firstname, eds, service, domaine, mail))
     
+    
+    
+    bouton_8.pack(padx=10, pady=15, side=LEFT)
+
+
+
+
+def annuler_search():
+    bouton_8.pack_forget()
+    with open('base.csv') as f:
+        reader = csv.DictReader(f, delimiter = ';')
+        for row in reader:
+            login = row['Login']
+            name = row['Nom']
+            firstname = row['Prenom']
+            eds = row['EDS']
+            service = row['SERVICE/AGENCE']
+            domaine = row['Domaine_metier']
+            mail = row['Mail']
+            tab_info.insert("", 0, values=(login, name, firstname, eds, service, domaine, mail))
 
 
 
@@ -298,7 +323,10 @@ txt_poste.pack(padx= 5, pady= 15, side=LEFT)
 champ_poste = Entry(frame_2)
 champ_poste.pack(padx=10, pady= 15, side=LEFT)
 
-bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white')
+bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white', command=search)
+bouton_8.pack(padx=10, pady=15, side=LEFT)
+
+bouton_8 = Button(frame_2, text="Annuler", font=("Arial"), bg='#2BA640', fg='white', command=annuler_search)
 bouton_8.pack(padx=10, pady=15, side=LEFT)
 
 

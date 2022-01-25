@@ -1,6 +1,7 @@
 from ast import Return
 from cProfile import label
 from cgitb import text
+from dataclasses import fields
 import email
 from heapq import heappush
 from os import sep
@@ -11,8 +12,10 @@ from textwrap import fill
 import tkinter as tk 
 from tkinter import * 
 from tkinter import font
-from turtle import bgcolor, heading, left, right
-from webbrowser import get 
+from turtle import bgcolor, heading, left, right, width
+from webbrowser import get
+from matplotlib.pyplot import title
+from numpy import left_shift, pad 
 import qrcode
 from PIL import Image
 import csv
@@ -74,7 +77,7 @@ def page_2():
 def page_3():
     frame_1.pack_forget()
     frame_quitter.pack_forget()
-    frame_3.pack()
+    frame_3.place(x=200, y=100, width= 800, height=550)
     
 
 #revenir à la page précédente     
@@ -88,7 +91,7 @@ def page_2to1():
     
 
 def page_3to1():
-    frame_3.pack_forget()
+    frame_3.place_forget()
     frame_1.pack()
     frame_quitter.pack()
 
@@ -97,19 +100,22 @@ def page_4():
     frame_1.pack_forget()
     frame_quitter.pack_forget()
     frame_5.pack()
+    frame_5.place(x=200, y=100, width= 800, height=550)
 
 
 def page_4to1():
     frame_5.pack_forget()
+    frame_5.place_forget()
     frame_1.pack()
     frame_quitter.pack()
+
+
+
 
 
 def QR_auto():
     line = tab_info.item(tab_info.selection())
     item = tab_info.selection()[0]
-    # print(tab_info.item(item)['values'])
-    # print(line['values'][1])
     Nom = line['values'][1] +' ' + line['values'][2]
     Email = line['values'][6]
     
@@ -121,18 +127,34 @@ def QR_auto():
     
 
 
-def QR_manu():
-    name2 = champ_NOM.get() + ' ' + champ_PRENOM.get()
-    mail2 = champ_MAIL.get()
+def QR_manuel():
+    name_info = champ_NOM.get() + ' ' + champ_PRENOM.get()
+    mail1_info = champ_MAIL.get()
+    mail2_info = champ_MAIL_2.get()
+    numero1_info = champ_NUMERO.get()
+    numero2_info = champ_NUMERO_2.get()
+    fax_info = champ_FAX.get()
+    adresse_info = champ_ADRESSE.get()
+    localisation_info = champ_LATITUDE.get() + ' ' + champ_LONGITUDE.get()
     
-    qr_manu =  helpers.make_mecard(name = name2, email= mail2)
+    qr_manu =  helpers.make_vcard(name = name_info, displayname=name_info, email=(mail1_info, mail2_info), phone=(numero1_info, numero2_info),
+                                  fax=fax_info, street=adresse_info, pobox=localisation_info , url='https://www.credit-agricole.fr/ca-guadeloupe/particulier.html', org='Crédit Agricole')
     qr_manu.designator
-    qr_manu.save(name2 + '_qrcode_manuel.png', scale=4, data_dark='#006C50', dark='#006C50')
+    qr_manu.save(name_info + '_qrcode_manuel.png', scale=4, data_dark='#006C50', dark='#006C50')
     
     
     champ_NOM.delete(0,"end")
     champ_PRENOM.delete(0,"end")  
-    champ_MAIL.delete(0,"end") 
+    champ_MAIL.delete(0,"end")
+    champ_MAIL_2.delete(0,"end")
+    champ_NUMERO.delete(0,"end")
+    champ_NUMERO_2.delete(0,"end")
+    champ_FAX.delete(0, "end")
+    champ_ADRESSE.delete(0,"end")
+    champ_LATITUDE.delete(0, "end")
+    champ_LONGITUDE.delete(0, "end")
+    
+     
     
 
 
@@ -157,9 +179,9 @@ label.pack()
 #creer frame (boite)
 frame_1 = Frame(window, background="#FFFFFF")
 frame_2 = Frame(window,background="#006C50")
-frame_3 = Frame(window,background="#FFFFFF")
+frame_3 = Frame(window,background="#D6D6D6")
 frame_4 = Frame(window,background="#FFFFFF")
-frame_5 = Frame(window,background="#FFFFFF")
+frame_5 = Frame(window,background="#D6D6D6")
 frame_quitter = Frame(window,background="#FFFFFF")
 
 
@@ -233,19 +255,19 @@ label_subtitle.pack()
 
 
 #boutons frame 1
-bouton_1 = Button(frame_1, text="Générer un QR Code de contact", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
-bouton_1.pack()
+bouton_1 = Button(frame_1, text="Générer un QR Code de contact   ", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
+bouton_1.pack(padx=10, pady=15, ipadx=20, ipady=30)
 
-bouton_4 =Button(frame_1, text="Générer un QR code contact manuellement", font=("Arial"), bg='#006C50', fg='white', command=page_4)
-bouton_4.pack()
+bouton_4 =Button(frame_1, text="Générer un QR Code par formulaire", font=("Arial"), bg='#006C50', fg='white', command=page_4)
+bouton_4.pack(padx=10, pady=30,  ipadx=20, ipady=30)
 
 bouton_2 = Button(frame_1, text="Générer un QR Code événementiel", font=("Arial"), bg ='#006C50', fg='white', command=page_3)
-bouton_2.pack()
+bouton_2.pack(padx=10, pady=40,  ipadx=20, ipady=30)
 
 
 
 bouton_3 = Button(frame_quitter, text="Quitter", font=("Arial"), bg ='#ED1C24', fg='white', command=window.quit)
-bouton_3.pack()
+bouton_3.pack(ipadx=10, ipady=10)
 
 
 
@@ -292,48 +314,59 @@ bouton_creer.pack(side=LEFT)
 
 
 # frame 3
-txt_lien = Label(frame_3, text="Entrez le lien  : ", font=("Arial"), bg ='#006C50', fg='white')
-champ_lien = Entry(frame_3)
-txt_lien.pack()
-champ_lien.pack()
-
-txt_E = Label(frame_3, text="Entrez le nom de l'évènement : ", font=("Arial"), bg ='#006C50', fg='white')
-champ_E = Entry(frame_3)
-txt_E.pack()
-champ_E.pack()
+txt_lien = Label(frame_3, text="Entrez le lien  : ", font=("Arial", 15), bg ='#D6D6D6', fg='black').place(x=340, y=100)
+champ_lien = Entry(frame_3).place(x=250, y=150, width=300)
 
 
-bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='white', command= QR_code)
-bouton_6.pack()
+txt_E = Label(frame_3, text="Entrez le nom de l'évènement : ", font=("Arial", 15), bg ='#D6D6D6', fg='black').place(x=290, y=200)
+champ_E = Entry(frame_3).place(x=250, y=250, width=300)
 
+bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='white', command= QR_code).place(x=250, y=350, width=100, height=50)
 
-bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_3to1)
-bouton_7.pack()
+bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_3to1).place(x=450, y=350, width=100, height=50)
+
 
 
 
 # frame 5
-txt_nom = Label(frame_5, text="NOM", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_nom.pack()
-champ_NOM = Entry(frame_5)
-champ_NOM.pack()
 
-txt_prenom = Label(frame_5, text="PRENOM", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_prenom.pack()
-champ_PRENOM = Entry(frame_5)
-champ_PRENOM.pack()
+txt_titre = Label(frame_5, text="Entrez vos coordonnées pour générer un QR Code  :", font=("Arial", 20), bg="#D6D6D6", fg="black").place(x=50, y=30)
 
-txt_mail = Label(frame_5, text="MAIL", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_mail.pack()
-champ_MAIL = Entry(frame_5)
-champ_MAIL.pack()
+txt_nom = Label(frame_5, text="Nom", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=90)
+champ_NOM = Entry(frame_5).place(x= 100, y=90)
 
-bouton_creer2 = Button(frame_5, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=QR_manu)
-bouton_creer2.pack()
+txt_prenom = Label(frame_5, text="Prénom", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=140)
+champ_PRENOM = Entry(frame_5).place(x=120, y=140)
+
+txt_mail = Label(frame_5, text="Mail", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=190)
+champ_MAIL = Entry(frame_5).place(x=100, y=190)
+
+txt_mail_2 = Label(frame_5, text="second Mail", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y= 240)
+champ_MAIL_2 = Entry(frame_5).place(x=150, y=240)
+
+txt_numero = Label(frame_5, text="Numéro", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=290)
+champ_NUMERO = Entry(frame_5).place(x=150, y=290)
+
+txt_numero_2 = Label(frame_5, text="Second numéro", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=340)
+champ_NUMERO_2 = Entry(frame_5).place(x=200, y=340)
+
+txt_fax = Label(frame_5, text="FAX", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=90)
+champ_FAX = Entry(frame_5).place(x=550, y=90)
+
+txt_adresse = Label(frame_5, text="Adresse", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=140)
+champ_ADRESSE = Entry(frame_5).place(x=570, y=140)
+
+txt_localisation = Label(frame_5, text="Localisation  :", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=190)
+txt_latitude = Label(frame_5, text="Latitude", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=230)
+champ_LATITUDE = Entry(frame_5).place(x=550, y=230)
+txt_longitude = Label(frame_5, text="Longitude", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=280)
+champ_LONGITUDE = Entry(frame_5).place(x=570, y=280)
 
 
-bouton_7 = Button(frame_5, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_4to1)
-bouton_7.pack()
+bouton_creer2 = Button(frame_5, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=QR_manuel).place(x=400, y=400, width=100, height=50)
+
+bouton_7 = Button(frame_5, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_4to1).place(x=550, y=400, width=100, height=50)
+
 
 
 #affichage de la fenetre 

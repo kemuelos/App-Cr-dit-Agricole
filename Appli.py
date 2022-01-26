@@ -115,7 +115,6 @@ def page_4to1():
 
 def QR_auto():
     line = tab_info.item(tab_info.selection())
-    item = tab_info.selection()[0]
     Nom = line['values'][1] +' ' + line['values'][2]
     Email = line['values'][6]
     
@@ -157,30 +156,34 @@ def QR_manuel():
      
 
 def search():
-    nom_search = champ_nom.get()  
+    id_search = champ_id.get()
+    nom_search = champ_nom.get()
+    prenom_search = champ_prenom.get()
+    # eds_search = champ_eds.get()
+    # mail_search = champ_mail.get()
+    
+    
     tab_info.delete(*tab_info.get_children())
-    tab_info.insert("",0,values=(login, name, firstname, eds, service, domaine, mail))
     
+    if len(id_search)!=0:
+        for key in dict_info:
+            if dict_info[key]["login"]==id_search:
+                employe_search = dict_info[key]
+                break
     
+    elif len(nom_search)!=0 and len(prenom_search) != 0:
+        employe_search = dict_info["-".join([nom_search, prenom_search])]
+        
     
-    bouton_8.pack(padx=10, pady=15, side=LEFT)
+    tab_info.insert("", 0, values=(employe_search["login"],employe_search["name"],employe_search["firstname"],employe_search["eds"],employe_search["service"],employe_search["domaine"],employe_search["mail"])) 
+    bouton_9.pack(padx=10, pady=15, side=LEFT)
 
 
 
 
 def annuler_search():
-    bouton_8.pack_forget()
-    with open('base.csv') as f:
-        reader = csv.DictReader(f, delimiter = ';')
-        for row in reader:
-            login = row['Login']
-            name = row['Nom']
-            firstname = row['Prenom']
-            eds = row['EDS']
-            service = row['SERVICE/AGENCE']
-            domaine = row['Domaine_metier']
-            mail = row['Mail']
-            tab_info.insert("", 0, values=(login, name, firstname, eds, service, domaine, mail))
+    bouton_9.pack_forget()
+    
 
 
 
@@ -244,20 +247,23 @@ tab_info.pack(expand=YES, fill=BOTH)
 tab_info.bind("<ButtonRelease-1>")
 
 
-with open('base.csv') as f:
-    reader = csv.DictReader(f, delimiter = ';')
+
+
+
+
+dict_info = {}
+title = ["login", "name", "firstname", "eds", "service", "domaine", "mail"]
+with open('base.csv', newline='') as f:
+    reader = csv.reader(f, delimiter = ' ')
+    next(reader)
     for row in reader:
-        login = row['Login']
-        name = row['Nom']
-        firstname = row['Prenom']
-        eds = row['EDS']
-        service = row['SERVICE/AGENCE']
-        domaine = row['Domaine_metier']
-        mail = row['Mail']
-        tab_info.insert("", 0, values=(login, name, firstname, eds, service, domaine, mail))
-
-
-
+        tmp = row[0].split(";")
+        if len(tmp)==7:
+            employe = {}
+            for i in range (7):
+                employe[title[i]] = tmp[i]
+            dict_info['-'.join([tmp[1], tmp[2]])] = employe
+            tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["eds"],employe["service"],employe["domaine"],employe["mail"]))       
 
 
 
@@ -326,8 +332,7 @@ champ_poste.pack(padx=10, pady= 15, side=LEFT)
 bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white', command=search)
 bouton_8.pack(padx=10, pady=15, side=LEFT)
 
-bouton_8 = Button(frame_2, text="Annuler", font=("Arial"), bg='#2BA640', fg='white', command=annuler_search)
-bouton_8.pack(padx=10, pady=15, side=LEFT)
+bouton_9 = Button(frame_2, text="Annuler", font=("Arial"), bg='#2BA640', fg='white', command=annuler_search)
 
 
 

@@ -14,8 +14,10 @@ from tkinter import *
 from tkinter import font
 from turtle import bgcolor, heading, left, right, width
 from webbrowser import get
+from matplotlib import lines
 from matplotlib.pyplot import title
-from numpy import left_shift, pad 
+from numpy import left_shift, pad, place
+from pyparsing import line 
 import qrcode
 from PIL import Image
 import csv
@@ -30,15 +32,15 @@ import io
 
 
 
+
     
 
 #fonction QR évenementiel
 def QR_code():
     lien = champ_lien.get()
     logo_link = 'ca_guadeloupe.png'
-    E = champ_E.get()
     logo = Image.open(logo_link)
-
+    E = champ_E.get()
     basewidth = 100
 
     wpercent = (basewidth/float(logo.size[0]))
@@ -61,7 +63,8 @@ def QR_code():
     QRimg.paste(logo, pos)
 
     QRimg.save('qr_' + E +'.jpeg')
-    champ_lien.delete(0,"end")    
+    champ_lien.delete(0,"end")
+    champ_E.delete(0, "end")   
     
 
 
@@ -110,7 +113,8 @@ def page_4to1():
     frame_quitter.pack()
 
 
-
+  
+    
 
 
 def QR_auto():
@@ -153,16 +157,19 @@ def QR_manuel():
     champ_LATITUDE.delete(0, "end")
     champ_LONGITUDE.delete(0, "end")
     
-     
+
+
+    
+
+
+
+
+
 
 def search():
     id_search = champ_id.get()
     nom_search = champ_nom.get()
     prenom_search = champ_prenom.get()
-    # eds_search = champ_eds.get()
-    # mail_search = champ_mail.get()
-    
-    
     tab_info.delete(*tab_info.get_children())
     
     if len(id_search)!=0:
@@ -179,15 +186,12 @@ def search():
     bouton_9.pack(padx=10, pady=15, side=LEFT)
 
 
-
-
 def annuler_search():
     bouton_9.pack_forget()
+    afficher(dict_info, tab_info)
     
 
-
-
-    
+  
 
 
 #crer fenetre
@@ -210,6 +214,7 @@ frame_2 = Frame(window,background="#006C50")
 frame_3 = Frame(window,background="#D6D6D6")
 frame_4 = Frame(window,background="#FFFFFF")
 frame_5 = Frame(window,background="#D6D6D6")
+frame_6 = Frame(window, background="#D6D6D6")
 frame_quitter = Frame(window,background="#FFFFFF")
 
 
@@ -250,14 +255,15 @@ tab_info.bind("<ButtonRelease-1>")
 
 
 
-
 dict_info = {}
 title = ["login", "name", "firstname", "eds", "service", "domaine", "mail"]
 with open('base.csv', newline='') as f:
     reader = csv.reader(f, delimiter = ' ')
     next(reader)
     for row in reader:
-        tmp = row[0].split(";")
+        tmp = row[0].split(';')
+        if len(tmp)==1:
+            tmp = row[0].split(',')
         if len(tmp)==7:
             employe = {}
             for i in range (7):
@@ -266,6 +272,10 @@ with open('base.csv', newline='') as f:
             tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["eds"],employe["service"],employe["domaine"],employe["mail"]))       
 
 
+def afficher(dict_info, tab_info):
+    for key in dict_info:
+        tab_info.insert("", 0, values=(dict_info[key]["login"],dict_info[key]["name"],dict_info[key]["firstname"],dict_info[key]["eds"],dict_info[key]["service"],dict_info[key]["domaine"],dict_info[key]["mail"]))       
+        
 
 
 
@@ -344,15 +354,14 @@ bouton_creer = Button(frame_4, text="Creer", font=("Arial"), bg='#2BA640', fg='w
 bouton_creer.pack(side=LEFT)
 
 
-
-
 # frame 3
 txt_lien = Label(frame_3, text="Entrez le lien  : ", font=("Arial", 15), bg ='#D6D6D6', fg='black').place(x=340, y=100)
-champ_lien = Entry(frame_3).place(x=250, y=150, width=300)
-
+champ_lien = Entry(frame_3)
+champ_lien.place(x=250, y=150, width=300)
 
 txt_E = Label(frame_3, text="Entrez le nom de l'évènement : ", font=("Arial", 15), bg ='#D6D6D6', fg='black').place(x=290, y=200)
-champ_E = Entry(frame_3).place(x=250, y=250, width=300)
+champ_E = Entry(frame_3)
+champ_E.place(x=250, y=250, width=300)
 
 bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='white', command= QR_code).place(x=250, y=350, width=100, height=50)
 
@@ -366,39 +375,49 @@ bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='whi
 txt_titre = Label(frame_5, text="Entrez vos coordonnées pour générer un QR Code  :", font=("Arial", 20), bg="#D6D6D6", fg="black").place(x=50, y=30)
 
 txt_nom = Label(frame_5, text="Nom", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=90)
-champ_NOM = Entry(frame_5).place(x= 100, y=90)
+champ_NOM = Entry(frame_5)
+champ_NOM.place(x= 180, y=90)
 
 txt_prenom = Label(frame_5, text="Prénom", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=140)
-champ_PRENOM = Entry(frame_5).place(x=120, y=140)
+champ_PRENOM = Entry(frame_5)
+champ_PRENOM.place(x=180, y=140)
 
 txt_mail = Label(frame_5, text="Mail", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=190)
-champ_MAIL = Entry(frame_5).place(x=100, y=190)
+champ_MAIL = Entry(frame_5)
+champ_MAIL.place(x=180, y=190)
 
 txt_mail_2 = Label(frame_5, text="second Mail", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y= 240)
-champ_MAIL_2 = Entry(frame_5).place(x=150, y=240)
+champ_MAIL_2 = Entry(frame_5)
+champ_MAIL_2.place(x=180, y=240)
 
 txt_numero = Label(frame_5, text="Numéro", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=290)
-champ_NUMERO = Entry(frame_5).place(x=150, y=290)
+champ_NUMERO = Entry(frame_5)
+champ_NUMERO.place(x=180, y=290)
 
 txt_numero_2 = Label(frame_5, text="Second numéro", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=340)
-champ_NUMERO_2 = Entry(frame_5).place(x=200, y=340)
+champ_NUMERO_2 = Entry(frame_5)
+champ_NUMERO_2.place(x=180, y=340)
 
 txt_fax = Label(frame_5, text="FAX", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=90)
-champ_FAX = Entry(frame_5).place(x=550, y=90)
+champ_FAX = Entry(frame_5)
+champ_FAX.place(x=600, y=90)
 
 txt_adresse = Label(frame_5, text="Adresse", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=140)
-champ_ADRESSE = Entry(frame_5).place(x=570, y=140)
+champ_ADRESSE = Entry(frame_5)
+champ_ADRESSE.place(x=600, y=140)
 
 txt_localisation = Label(frame_5, text="Localisation  :", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=190)
 txt_latitude = Label(frame_5, text="Latitude", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=230)
-champ_LATITUDE = Entry(frame_5).place(x=550, y=230)
+champ_LATITUDE = Entry(frame_5)
+champ_LATITUDE.place(x=600, y=230)
 txt_longitude = Label(frame_5, text="Longitude", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=280)
-champ_LONGITUDE = Entry(frame_5).place(x=570, y=280)
-
+champ_LONGITUDE = Entry(frame_5)
+champ_LONGITUDE.place(x=600, y=280)
 
 bouton_creer2 = Button(frame_5, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=QR_manuel).place(x=400, y=400, width=100, height=50)
 
 bouton_7 = Button(frame_5, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_4to1).place(x=550, y=400, width=100, height=50)
+
 
 
 

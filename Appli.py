@@ -3,6 +3,7 @@ from cProfile import label
 from cgitb import text
 from dataclasses import fields
 import email
+from fileinput import filename
 from heapq import heappush
 from os import sep
 from re import A
@@ -29,8 +30,7 @@ import vobject
 import segno
 from segno import helpers
 import io
-
-
+from tkinter import filedialog
 
 
     
@@ -69,9 +69,20 @@ def QR_code():
 
 
 #fonction pour passer à la page suivante
-def page_2():
+
+def page_ouvrir():
+    frame_open.place(x=200, y=100, width= 800, height=550)
     frame_1.pack_forget()
     frame_quitter.pack_forget()
+
+def page_ouvrir_to1():
+    frame_open.place_forget()
+    frame_1.pack()
+    frame_quitter.pack()
+
+
+def page_2():
+    frame_open.place_forget()
     frame_2.pack()
     frame_csv.pack()
     frame_4.pack()
@@ -161,12 +172,8 @@ def QR_manuel():
 
     
 
-
-
-
-
-
 def search():
+    dict_info = {}
     id_search = champ_id.get()
     nom_search = champ_nom.get()
     prenom_search = champ_prenom.get()
@@ -180,13 +187,15 @@ def search():
     
     elif len(nom_search)!=0 and len(prenom_search) != 0:
         employe_search = dict_info["-".join([nom_search, prenom_search])]
-        
+    
+    print(employe_search)    
     
     tab_info.insert("", 0, values=(employe_search["login"],employe_search["name"],employe_search["firstname"],employe_search["eds"],employe_search["service"],employe_search["domaine"],employe_search["mail"])) 
     bouton_9.pack(padx=10, pady=15, side=LEFT)
-
+ 
 
 def annuler_search():
+    dict_info = {}
     bouton_9.pack_forget()
     afficher(dict_info, tab_info)
     
@@ -214,7 +223,7 @@ frame_2 = Frame(window,background="#006C50")
 frame_3 = Frame(window,background="#D6D6D6")
 frame_4 = Frame(window,background="#FFFFFF")
 frame_5 = Frame(window,background="#D6D6D6")
-frame_6 = Frame(window, background="#D6D6D6")
+frame_open = Frame(window, background="#D6D6D6")
 frame_quitter = Frame(window,background="#FFFFFF")
 
 
@@ -253,36 +262,36 @@ tab_info.bind("<ButtonRelease-1>")
 
 
 
+def dialog_box():
+    file = filedialog.askopenfilename()
+    champ_source.insert(0, file)
 
-
-dict_info = {}
-title = ["login", "name", "firstname", "eds", "service", "domaine", "mail"]
-with open('base.csv', newline='') as f:
-    reader = csv.reader(f, delimiter = ' ')
-    next(reader)
-    for row in reader:
-        tmp = row[0].split(';')
-        if len(tmp)==1:
-            tmp = row[0].split(',')
-        if len(tmp)==7:
-            employe = {}
-            for i in range (7):
-                employe[title[i]] = tmp[i]
-            dict_info['-'.join([tmp[1], tmp[2]])] = employe
-            tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["eds"],employe["service"],employe["domaine"],employe["mail"]))       
+    dict_info = {}
+    title = ["login", "name", "firstname", "eds", "service", "domaine", "mail"]
+    with open(file, newline='') as f:
+        reader = csv.reader(f, delimiter = ' ')
+        next(reader)
+        for row in reader:
+            tmp = row[0].split(';')
+            if len(tmp)==1:
+                tmp = row[0].split(',')
+            if len(tmp)==7:
+                employe = {}
+                for i in range (7):
+                    employe[title[i]] = tmp[i]
+                dict_info['-'.join([tmp[1], tmp[2]])] = employe
+                tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["eds"],employe["service"],employe["domaine"],employe["mail"]))       
 
 
 def afficher(dict_info, tab_info):
     for key in dict_info:
         tab_info.insert("", 0, values=(dict_info[key]["login"],dict_info[key]["name"],dict_info[key]["firstname"],dict_info[key]["eds"],dict_info[key]["service"],dict_info[key]["domaine"],dict_info[key]["mail"]))       
-        
-
+       
 
 
 #affichage de la frame
 frame_1.pack()
 frame_quitter.pack()
-
 
 
 #creer les widgets (contenus dans la frame 1)
@@ -296,7 +305,7 @@ label_subtitle.pack()
 
 
 #boutons frame 1
-bouton_1 = Button(frame_1, text="Générer un QR Code de contact   ", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
+bouton_1 = Button(frame_1, text="Générer un QR Code de contact   ", font=("Arial"), bg ='#006C50', fg='white', command=page_ouvrir)
 bouton_1.pack(padx=10, pady=15, ipadx=20, ipady=30)
 
 bouton_4 =Button(frame_1, text="Générer un QR Code par formulaire", font=("Arial"), bg='#006C50', fg='white', command=page_4)
@@ -309,6 +318,20 @@ bouton_2.pack(padx=10, pady=40,  ipadx=20, ipady=30)
 
 bouton_3 = Button(frame_quitter, text="Quitter", font=("Arial"), bg ='#ED1C24', fg='white', command=window.quit)
 bouton_3.pack(ipadx=10, ipady=10)
+
+
+#frame ouvrir fichier
+champ_source = Entry(frame_open)
+champ_source.pack()
+
+bouton_ouvrir = Button(frame_open, text="Ouvrir fichier", font=("Arial"), bg ='#006C50', fg='white', command=dialog_box)
+bouton_ouvrir.pack(side=BOTTOM)
+
+bouton_continuer = Button(frame_open, text="Continuer", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
+bouton_continuer.pack(side=BOTTOM)
+
+bouton_retour_2 = Button(frame_open, text="Retour menu", font=("Arial"), bg ='#ED1C24', fg='white', command=page_ouvrir_to1)
+bouton_retour_2.pack(side=BOTTOM)
 
 
 

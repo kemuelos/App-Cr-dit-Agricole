@@ -1,6 +1,7 @@
 from ast import Return
 from cProfile import label
 from cgitb import text
+from ctypes.wintypes import BOOL
 from dataclasses import fields
 import email
 from fileinput import filename
@@ -131,11 +132,18 @@ def page_4to1():
 def QR_auto():
     line = tab_info.item(tab_info.selection())
     Nom = line['values'][1] +' ' + line['values'][2]
-    Email = line['values'][6]
+    Poste = line['values'][3]
+    Telephone_fixe = line['values'][4]
+    Telephone_mobile = line['values'][5]
+    Adresse = line['values'][6]
+    Ville = line['values'][7]
+    Email = line['values'][8]
     
 
     
-    qr_auto = helpers.make_mecard(name = Nom, email= Email)
+    qr_auto = helpers.make_vcard(name = Nom, displayname=Nom, phone=(Telephone_fixe,Telephone_mobile), street=Adresse, 
+                                  pobox=Ville, email= Email, memo=Poste, url='https://www.credit-agricole.fr/ca-guadeloupe/particulier.html', org='Crédit Agricole')
+    
     qr_auto.designator
     qr_auto.save(Nom + '_qrcode_auto.png', scale=4, data_dark='#006C50', dark='#006C50')
     
@@ -188,10 +196,10 @@ def search():
     elif len(nom_search)!=0 and len(prenom_search) != 0:
         employe_search = dict_info["-".join([nom_search, prenom_search])]
     
-    print(employe_search)    
-    
-    tab_info.insert("", 0, values=(employe_search["login"],employe_search["name"],employe_search["firstname"],employe_search["eds"],employe_search["service"],employe_search["domaine"],employe_search["mail"])) 
     bouton_9.pack(padx=10, pady=15, side=LEFT)
+    tab_info.insert("", 0, values=(employe_search["login"],employe_search["name"],employe_search["firstname"],employe_search["poste"],
+                                                employe_search["tel"],employe_search["number"], employe_search["adress"], employe_search["city"],employe_search["mail"])) 
+    
  
 
 def annuler_search():
@@ -229,34 +237,41 @@ frame_quitter = Frame(window,background="#FFFFFF")
 
 
 #frame qui affiche le csv
-frame_csv = Frame(window, bd=3,relief= GROOVE, bg="#FFFFFF", width=1080, height=550)
+frame_csv = Frame(window, bd=3,relief= GROOVE, bg="#FFFFFF", width=1150, height=550)
 frame_csv.pack_propagate(False)
 
 
 #Tableau qui stock le csv
 
 scroll_y = Scrollbar(frame_csv, orient=VERTICAL)
-tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "eds", "service", "domaine", "mail"), yscrollcommand=scroll_y.set)
+scroll_x = Scrollbar(frame_csv, orient=HORIZONTAL)
+tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "poste", "telephone", "mobile", "adresse", "ville", "mail"), yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
 scroll_y.config(command=tab_info.yview)
 scroll_y.pack(side=RIGHT, fill=Y)
+scroll_x.config(command=tab_info.xview)
+scroll_x.pack(side=BOTTOM, fill=X)
 
 
 tab_info.heading("id", text="Login")
 tab_info.heading("nom", text="Nom")
 tab_info.heading("prenom", text="Prenom")
-tab_info.heading("eds", text="EDS")
-tab_info.heading("service", text="Service/Agence")
-tab_info.heading("domaine", text="Domaine/Metier")
+tab_info.heading("poste", text="Poste")
+tab_info.heading("telephone", text="Telephone")
+tab_info.heading("mobile", text="Mobile")
+tab_info.heading("adresse", text="Adresse")
+tab_info.heading("ville", text="Ville")
 tab_info.heading("mail", text="Mail")
 
 tab_info.column("#0", minwidth=0,width=0)
-tab_info.column('#1', width=100) #id
-tab_info.column('#2', minwidth=0,width=120) #nom
-tab_info.column('#3', minwidth=0,width=100) #prenom
-tab_info.column('#4', minwidth=0,width=100) #eds
-tab_info.column('#5', minwidth=0,width=150) #service
-tab_info.column('#6', minwidth=0,width=150) #domaine
-tab_info.column('#7', minwidth=0,width=320) #mail
+tab_info.column('#1', width=80) #id
+tab_info.column('#2', minwidth=0,width=150) #nom
+tab_info.column('#3', minwidth=0,width=150) #prenom
+tab_info.column('#4', minwidth=0,width=300) #poste
+tab_info.column('#5', minwidth=0,width=100) #telephone
+tab_info.column('#6', minwidth=0,width=150) #mobile
+tab_info.column('#7', minwidth=0,width=250) #adresse
+tab_info.column('#8', minwidth=0,width=100) #ville
+tab_info.column('#9', minwidth=0,width=300) #mail
 tab_info.pack(expand=YES, fill=BOTH)
 tab_info.bind("<ButtonRelease-1>")
 
@@ -267,25 +282,23 @@ def dialog_box():
     champ_source.insert(0, file)
 
     dict_info = {}
-    title = ["login", "name", "firstname", "eds", "service", "domaine", "mail"]
+    title = ["login", "name", "firstname", "poste", "tel", "number", "adress", "city", "mail"]
     with open(file, newline='') as f:
-        reader = csv.reader(f, delimiter = ' ')
+        reader = csv.reader(f, delimiter = ';')
         next(reader)
         for row in reader:
-            tmp = row[0].split(';')
-            if len(tmp)==1:
-                tmp = row[0].split(',')
-            if len(tmp)==7:
-                employe = {}
-                for i in range (7):
-                    employe[title[i]] = tmp[i]
-                dict_info['-'.join([tmp[1], tmp[2]])] = employe
-                tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["eds"],employe["service"],employe["domaine"],employe["mail"]))       
+            employe = {}
+            for i in range (9):
+                employe[title[i]] = row[i]
+            dict_info['-'.join([row[1], row[2]])] = employe
+            tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["poste"],
+                                                employe["tel"],employe["number"], employe["adress"], employe["city"],employe["mail"]))   
 
 
 def afficher(dict_info, tab_info):
     for key in dict_info:
-        tab_info.insert("", 0, values=(dict_info[key]["login"],dict_info[key]["name"],dict_info[key]["firstname"],dict_info[key]["eds"],dict_info[key]["service"],dict_info[key]["domaine"],dict_info[key]["mail"]))       
+        tab_info.insert("", 0, values=(dict_info[key]["login"],dict_info[key]["name"],dict_info[key]["firstname"],
+                                       dict_info[key]["poste"],dict_info[key]["tel"],dict_info[key]["number"], dict_info[key]["adress"], dict_info[key]["city"],dict_info[key]["mail"]))       
        
 
 
@@ -357,10 +370,10 @@ txt_agence.pack(padx=5, pady=15, side=LEFT)
 champ_agence = Entry(frame_2)
 champ_agence.pack(padx= 10, pady= 15, side=LEFT)
 
-txt_poste = Label(frame_2, text="Poste", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_poste = Label(frame_2, text="Mail", font=("Arial"), bg="#FFFFFF", fg="black")
 txt_poste.pack(padx= 5, pady= 15, side=LEFT)
-champ_poste = Entry(frame_2)
-champ_poste.pack(padx=10, pady= 15, side=LEFT)
+champ_mail = Entry(frame_2)
+champ_mail.pack(padx=10, pady= 15, side=LEFT)
 
 bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white', command=search)
 bouton_8.pack(padx=10, pady=15, side=LEFT)

@@ -1,9 +1,14 @@
+import csv
+import email
+import io
+import tkinter
+import tkinter as tk
+import tkinter as ttk
 from ast import Return
-from cProfile import label
 from cgitb import text
+from cProfile import label
 from ctypes.wintypes import BOOL
 from dataclasses import fields
-import email
 from fileinput import filename
 from heapq import heappush
 from os import sep
@@ -11,62 +16,22 @@ from re import A
 from select import select
 from sqlite3 import Row
 from textwrap import fill
-import tkinter as tk 
-from tkinter import * 
-from tkinter import font
+from tkinter import *
+from tkinter import filedialog, font, ttk
 from turtle import bgcolor, heading, left, right, width
 from webbrowser import get
+
+import pandas as pd
+import qrcode
+import segno
+import vobject
 from matplotlib import lines
 from matplotlib.pyplot import title
 from numpy import left_shift, pad, place
-from pyparsing import line 
-import qrcode
 from PIL import Image
-import csv
-import tkinter
-import tkinter as ttk
-from tkinter import ttk
-import pandas as pd
-import vobject
-import segno
+from pyparsing import line
 from segno import helpers
-import io
-from tkinter import filedialog
 
-
-    
-
-#fonction QR évenementiel
-def QR_code():
-    lien = champ_lien.get()
-    logo_link = 'ca_guadeloupe.png'
-    logo = Image.open(logo_link)
-    E = champ_E.get()
-    basewidth = 100
-
-    wpercent = (basewidth/float(logo.size[0]))
-    hsize = int((float(logo.size[1])*float(wpercent)))
-    logo = logo.resize((basewidth, hsize), Image.ANTIALIAS)
-    QRcode = qrcode.QRCode(
-        error_correction=qrcode.constants.ERROR_CORRECT_H
-    )
-
-    url = lien 
-
-    QRcode.add_data(url)
-    QRcode.make()
-
-
-    QRimg = QRcode.make_image(fill_color='#006C50', back_color="white").convert('RGB')
-
-    pos = ((QRimg.size[0] - logo.size[0]) // 2,
-           (QRimg.size[1] - logo.size[1]) // 2)
-    QRimg.paste(logo, pos)
-
-    QRimg.save('qr_' + E +'.jpeg')
-    champ_lien.delete(0,"end")
-    champ_E.delete(0, "end")   
-    
 
 
 #fonction pour passer à la page suivante
@@ -126,11 +91,43 @@ def page_4to1():
 
 
   
-    
+  
+#fonction QR évenementiel
+def QR_code():
+    lien = champ_lien.get()
+    logo_link = 'ca_guadeloupe.png'
+    logo = Image.open(logo_link)
+    E = champ_E.get()
+    basewidth = 100
+
+    wpercent = (basewidth/float(logo.size[0]))
+    hsize = int((float(logo.size[1])*float(wpercent)))
+    logo = logo.resize((basewidth, hsize), Image.ANTIALIAS)
+    QRcode = qrcode.QRCode(
+        error_correction=qrcode.constants.ERROR_CORRECT_H
+    )
+
+    url = lien 
+
+    QRcode.add_data(url)
+    QRcode.make()
+
+
+    QRimg = QRcode.make_image(fill_color='#006C50', back_color="white").convert('RGB')
+
+    pos = ((QRimg.size[0] - logo.size[0]) // 2,
+           (QRimg.size[1] - logo.size[1]) // 2)
+    QRimg.paste(logo, pos)
+
+    QRimg.save('qr_code_evenement\\'+'qr_code_event'+ E +'.jpeg')
+    champ_lien.delete(0,"end")
+    champ_E.delete(0, "end")   
+        
 
 
 def QR_auto():
     line = tab_info.item(tab_info.selection())
+    Id = line['values'][0]
     Nom = line['values'][1] +' ' + line['values'][2]
     Poste = line['values'][3]
     Telephone_fixe = line['values'][4]
@@ -145,7 +142,8 @@ def QR_auto():
                                   pobox=Ville, email= Email, memo=Poste, url='https://www.credit-agricole.fr/ca-guadeloupe/particulier.html', org='Crédit Agricole')
     
     qr_auto.designator
-    qr_auto.save(Nom + '_qrcode_auto.png', scale=4, data_dark='#006C50', dark='#006C50')
+    qr_auto.save('qr_code_contact\\'+'qr_contact_' + Id +'.png', scale=4, data_dark='#006C50', dark='#006C50')
+    
     
 
 
@@ -162,7 +160,7 @@ def QR_manuel():
     qr_manu =  helpers.make_vcard(name = name_info, displayname=name_info, email=(mail1_info, mail2_info), phone=(numero1_info, numero2_info),
                                   fax=fax_info, street=adresse_info, pobox=localisation_info , url='https://www.credit-agricole.fr/ca-guadeloupe/particulier.html', org='Crédit Agricole')
     qr_manu.designator
-    qr_manu.save(name_info + '_qrcode_manuel.png', scale=4, data_dark='#006C50', dark='#006C50')
+    qr_manu.save('qr_code_formulaire\\'  +name_info + '_qrcode_manuel.png', scale=4, data_dark='#006C50', dark='#006C50')
     
     
     champ_NOM.delete(0,"end")
@@ -191,10 +189,6 @@ def search():
         for key in dict_info:
             if dict_info[key]["login"]==id_search:
                 employe_search = dict_info[key]
-                break
-    
-    elif len(nom_search)!=0 and len(prenom_search) != 0:
-        employe_search = dict_info[nom_search, prenom_search]
 
     tab_info.insert("", 0, values=(employe_search["login"],employe_search["name"],employe_search["firstname"],employe_search["poste"],
                                                 employe_search["tel"],employe_search["number"], employe_search["adress"], employe_search["city"],employe_search["mail"])) 
@@ -292,8 +286,8 @@ def dialog_box():
                 employe[title[i]] = row[i]
             dict_info['-'.join([row[1], row[2]])] = employe
             tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["poste"],
-                                                employe["tel"],employe["number"], employe["adress"], employe["city"],employe["mail"]))   
-
+                                                employe["tel"],employe["number"], employe["adress"], employe["city"],employe["mail"])) 
+           
 
 def afficher(dict_info, tab_info):
     for key in dict_info:
@@ -335,7 +329,7 @@ bouton_3.pack(ipadx=10, ipady=10)
 
 #frame ouvrir fichier
 txt_instruction = Label(frame_open, text="Veuillez sélectionnez une base", font=("Arial",20), bg="#D6D6D6", fg="black") 
-txt_instruction.place(x=20, y=10)
+txt_instruction.place(x=220, y=10)
 
 txt_chemin = Label(frame_open, text="Chemin du fichier :", font=("Arial"), bg="#D6D6D6", fg="black")
 txt_chemin.place(x=330, y=60)
@@ -343,7 +337,7 @@ champ_source = Entry(frame_open)
 champ_source.place(x=180, y=95, width=450)
 
 bouton_ouvrir = Button(frame_open, text="Ouvrir fichier", font=("Arial"), bg ='#006C50', fg='white', command=dialog_box)
-bouton_ouvrir.place(x=330, y=160)
+bouton_ouvrir.place(x=330, y=150)
 
 bouton_continuer = Button(frame_open, text="Continuer", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
 bouton_continuer.place(x=340, y=200)
@@ -369,17 +363,6 @@ txt_prenom.pack(padx=5, pady=15, side=LEFT)
 champ_prenom = Entry(frame_2)
 champ_prenom.pack(padx=10, pady=15, side=LEFT)
 
-
-txt_agence = Label(frame_2, text="Agence", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_agence.pack(padx=5, pady=15, side=LEFT)
-champ_agence = Entry(frame_2)
-champ_agence.pack(padx= 10, pady= 15, side=LEFT)
-
-txt_poste = Label(frame_2, text="Mail", font=("Arial"), bg="#FFFFFF", fg="black")
-txt_poste.pack(padx= 5, pady= 15, side=LEFT)
-champ_mail = Entry(frame_2)
-champ_mail.pack(padx=10, pady= 15, side=LEFT)
-
 bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white', command=search)
 bouton_8.pack(padx=10, pady=15, side=LEFT)
 
@@ -404,7 +387,7 @@ txt_E = Label(frame_3, text="Entrez le nom de l'évènement : ", font=("Arial", 
 champ_E = Entry(frame_3)
 champ_E.place(x=250, y=250, width=300)
 
-bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#006C50', fg='white', command= QR_code).place(x=250, y=350, width=100, height=50)
+bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#2BA640', fg='white', command= QR_code).place(x=250, y=350, width=100, height=50)
 
 bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_3to1).place(x=450, y=350, width=100, height=50)
 
@@ -435,9 +418,9 @@ txt_numero = Label(frame_5, text="Numéro", font=("Arial"), bg="#D6D6D6", fg="bl
 champ_NUMERO = Entry(frame_5)
 champ_NUMERO.place(x=180, y=290)
 
-txt_numero_2 = Label(frame_5, text="Second numéro", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=340)
+txt_numero_2 = Label(frame_5, text="2nd numéro", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=340)
 champ_NUMERO_2 = Entry(frame_5)
-champ_NUMERO_2.place(x=180, y=340)
+champ_NUMERO_2.place(x=180, y=345)
 
 txt_fax = Label(frame_5, text="FAX", font=("Arial"), bg="#D6D6D6", fg="black").place(x=480, y=90)
 champ_FAX = Entry(frame_5)

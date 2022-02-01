@@ -72,7 +72,7 @@ def QR_code():
 #fonction pour passer à la page suivante
 
 def page_ouvrir():
-    frame_open.place(x=200, y=100, width= 800, height=550)
+    frame_open.place(x=200, y=100, width= 800, height=300)
     frame_1.pack_forget()
     frame_quitter.pack_forget()
 
@@ -194,13 +194,13 @@ def search():
                 break
     
     elif len(nom_search)!=0 and len(prenom_search) != 0:
-        employe_search = dict_info["-".join([nom_search, prenom_search])]
-    
-    bouton_9.pack(padx=10, pady=15, side=LEFT)
+        employe_search = dict_info[nom_search, prenom_search]
+
     tab_info.insert("", 0, values=(employe_search["login"],employe_search["name"],employe_search["firstname"],employe_search["poste"],
                                                 employe_search["tel"],employe_search["number"], employe_search["adress"], employe_search["city"],employe_search["mail"])) 
     
- 
+    bouton_9.pack(padx=10, pady=15, side=LEFT)
+
 
 def annuler_search():
     dict_info = {}
@@ -334,17 +334,22 @@ bouton_3.pack(ipadx=10, ipady=10)
 
 
 #frame ouvrir fichier
+txt_instruction = Label(frame_open, text="Veuillez sélectionnez une base", font=("Arial",20), bg="#D6D6D6", fg="black") 
+txt_instruction.place(x=20, y=10)
+
+txt_chemin = Label(frame_open, text="Chemin du fichier :", font=("Arial"), bg="#D6D6D6", fg="black")
+txt_chemin.place(x=330, y=60)
 champ_source = Entry(frame_open)
-champ_source.pack()
+champ_source.place(x=180, y=95, width=450)
 
 bouton_ouvrir = Button(frame_open, text="Ouvrir fichier", font=("Arial"), bg ='#006C50', fg='white', command=dialog_box)
-bouton_ouvrir.pack(side=BOTTOM)
+bouton_ouvrir.place(x=330, y=160)
 
 bouton_continuer = Button(frame_open, text="Continuer", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
-bouton_continuer.pack(side=BOTTOM)
+bouton_continuer.place(x=340, y=200)
 
 bouton_retour_2 = Button(frame_open, text="Retour menu", font=("Arial"), bg ='#ED1C24', fg='white', command=page_ouvrir_to1)
-bouton_retour_2.pack(side=BOTTOM)
+bouton_retour_2.place(x=330, y=250)
 
 
 

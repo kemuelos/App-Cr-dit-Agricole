@@ -1,41 +1,17 @@
 import csv
-import email
-import io
-import tkinter
-import tkinter as tk
-import tkinter as ttk
-from ast import Return
-from cgitb import text
-from cProfile import label
-from ctypes.wintypes import BOOL
-from dataclasses import fields
-from fileinput import filename
-from heapq import heappush
-from os import sep
-from re import A
-from select import select
-from sqlite3 import Row
-from textwrap import fill
-from tkinter import *
-from tkinter import filedialog, font, ttk
-from turtle import bgcolor, heading, left, right, width
-from webbrowser import get
-
-import pandas as pd
-import qrcode
-import segno
-import vobject
-from matplotlib import lines
+from unicodedata import name
 from matplotlib.pyplot import title
-from numpy import left_shift, pad, place
+from segno import helpers 
+from tkinter import *
+from tkinter import filedialog
+from tkinter import ttk
+import qrcode
 from PIL import Image
-from pyparsing import line
-from segno import helpers
-
+import sys
+import os
 
 
 #fonction pour passer à la page suivante
-
 def page_ouvrir():
     frame_open.place(x=200, y=100, width= 800, height=300)
     frame_1.pack_forget()
@@ -46,19 +22,16 @@ def page_ouvrir_to1():
     frame_1.pack()
     frame_quitter.pack()
 
-
 def page_2():
     frame_open.place_forget()
     frame_2.pack()
     frame_csv.pack()
     frame_4.pack()
-    
 
 def page_3():
     frame_1.pack_forget()
     frame_quitter.pack_forget()
     frame_3.place(x=200, y=100, width= 800, height=550)
-    
 
 #revenir à la page précédente     
 def page_2to1():
@@ -67,14 +40,11 @@ def page_2to1():
     frame_csv.pack_forget()
     frame_1.pack()
     frame_quitter.pack()
-    
-    
 
 def page_3to1():
     frame_3.place_forget()
     frame_1.pack()
     frame_quitter.pack()
-
 
 def page_4():
     frame_1.pack_forget()
@@ -82,20 +52,16 @@ def page_4():
     frame_5.pack()
     frame_5.place(x=200, y=100, width= 800, height=550)
 
-
 def page_4to1():
     frame_5.pack_forget()
     frame_5.place_forget()
     frame_1.pack()
     frame_quitter.pack()
-
-
-  
   
 #fonction QR évenementiel
 def QR_code():
     lien = champ_lien.get()
-    logo_link = 'ca_guadeloupe.png'
+    logo_link = os.path.join(getPath(), 'ca_guadeloupe.png')
     logo = Image.open(logo_link)
     E = champ_E.get()
     basewidth = 100
@@ -119,16 +85,18 @@ def QR_code():
            (QRimg.size[1] - logo.size[1]) // 2)
     QRimg.paste(logo, pos)
 
-    QRimg.save('qr_code_evenement\\'+'qr_code_event'+ E +'.jpeg')
+    file = filedialog.asksaveasfile(title="Enregistrer sous ...", initialfile='qr_code_event_' + E, mode='w', defaultextension=".png", filetypes=() )
+
+    if file:
+        QRimg.save(file.name, scale=4, data_dark='#006C50', dark='#006C50')
+
     champ_lien.delete(0,"end")
     champ_E.delete(0, "end")   
-        
-
 
 def QR_auto():
     line = tab_info.item(tab_info.selection())
     Id = line['values'][0]
-    Nom = line['values'][1] +' ' + line['values'][2]
+    Nom = line['values'][1] + ' ' + line['values'][2]
     Poste = line['values'][3]
     Telephone_fixe = line['values'][4]
     Telephone_mobile = line['values'][5]
@@ -136,32 +104,38 @@ def QR_auto():
     Ville = line['values'][7]
     Email = line['values'][8]
     
-
-    
     qr_auto = helpers.make_vcard(name = Nom, displayname=Nom, phone=(Telephone_fixe,Telephone_mobile), street=Adresse, 
                                   pobox=Ville, email= Email, memo=Poste, url='https://www.credit-agricole.fr/ca-guadeloupe/particulier.html', org='Crédit Agricole')
     
     qr_auto.designator
-    qr_auto.save('qr_code_contact\\'+'qr_contact_' + Id +'.png', scale=4, data_dark='#006C50', dark='#006C50')
-    
-    
+    file = filedialog.asksaveasfile(title="Enregistrer sous ...", initialfile='qr_contact_' + Id, mode='w', defaultextension=".png", filetypes=() )
 
+    if file:
+        qr_auto.save(file.name, scale=4, data_dark='#006C50', dark='#006C50')
+    else:
+        return 
 
 def QR_manuel():
-    name_info = champ_NOM.get() + ' ' + champ_PRENOM.get()
+    name_info = ", ".join ([champ_NOM.get(), champ_PRENOM.get()])
+    display = " ".join ([champ_NOM.get(), champ_PRENOM.get()])
     mail1_info = champ_MAIL.get()
     mail2_info = champ_MAIL_2.get()
     numero1_info = champ_NUMERO.get()
     numero2_info = champ_NUMERO_2.get()
     fax_info = champ_FAX.get()
     adresse_info = champ_ADRESSE.get()
-    localisation_info = champ_LATITUDE.get() + ' ' + champ_LONGITUDE.get()
+    localisation_info = " ".join([champ_LATITUDE.get(), champ_LONGITUDE.get()])
     
-    qr_manu =  helpers.make_vcard(name = name_info, displayname=name_info, email=(mail1_info, mail2_info), phone=(numero1_info, numero2_info),
+    qr_manu =  helpers.make_vcard(name = name_info, displayname=display, email=(mail1_info, mail2_info), phone=(numero1_info, numero2_info),
                                   fax=fax_info, street=adresse_info, pobox=localisation_info , url='https://www.credit-agricole.fr/ca-guadeloupe/particulier.html', org='Crédit Agricole')
     qr_manu.designator
-    qr_manu.save('qr_code_formulaire\\'  +name_info + '_qrcode_manuel.png', scale=4, data_dark='#006C50', dark='#006C50')
-    
+
+    file = filedialog.asksaveasfile(title="Enregistrer sous ...", initialfile='qr_code_formulaire_' + name_info, mode='w', defaultextension=".png", filetypes=() )
+
+    if file:
+        qr_manu.save(file.name, scale=4, data_dark='#006C50', dark='#006C50')
+    else:
+        return 
     
     champ_NOM.delete(0,"end")
     champ_PRENOM.delete(0,"end")  
@@ -175,35 +149,93 @@ def QR_manuel():
     champ_LONGITUDE.delete(0, "end")
     
 
-
-    
-
-def search():
-    dict_info = {}
+def search(dict_info, tab_info):
     id_search = champ_id.get()
     nom_search = champ_nom.get()
     prenom_search = champ_prenom.get()
+    agence_search = champ_agence.get()
     tab_info.delete(*tab_info.get_children())
     
-    if len(id_search)!=0:
-        for key in dict_info:
-            if dict_info[key]["login"]==id_search:
-                employe_search = dict_info[key]
-
-    tab_info.insert("", 0, values=(employe_search["login"],employe_search["name"],employe_search["firstname"],employe_search["poste"],
-                                                employe_search["tel"],employe_search["number"], employe_search["adress"], employe_search["city"],employe_search["mail"])) 
+    res = []
     
+    if len(id_search):
+       for key, value in dict_info.items():
+           if value["login"]== id_search:
+               res.append(value)
+               break
+    
+    elif len(nom_search) and len(prenom_search):
+        key = "-".join([nom_search, prenom_search])
+        res.append(dict_info[key])
+    
+    elif len(nom_search):
+        for key, value in dict_info.items():
+           if value["name"]== nom_search:
+               res.append(value)
+               
+    elif len(prenom_search):
+        for key, value in dict_info.items():
+           if value["firstname"]== prenom_search:
+               res.append(value)
+               
+    elif len(agence_search):
+       for key, value in dict_info.items():
+           if value["adress"]== agence_search:
+               res.append(value)
+               
+    for elem in res:
+        tab_info.insert("", 0, values=(elem["login"],elem["name"],elem["firstname"],elem["poste"],
+                                                elem["tel"],elem["number"], elem["adress"], elem["city"],elem["mail"]))
     bouton_9.pack(padx=10, pady=15, side=LEFT)
 
 
-def annuler_search():
-    dict_info = {}
+def annuler_search(dict_info, tab_info):
+    tab_info.delete(*tab_info.get_children())
     bouton_9.pack_forget()
+    champ_id.delete(0,"end")
+    champ_nom.delete(0,"end")
+    champ_prenom.delete(0,"end")
+    champ_agence.delete(0, "end")
     afficher(dict_info, tab_info)
+ 
+ 
+def dialog_box(dict_info):
+    file = filedialog.askopenfilename()
+
+    if not file:
+        return
+
+    champ_source.insert(0, file)
+
+    title = ["login", "name", "firstname", "poste", "tel", "number", "adress", "city", "mail"]
+    with open(file, newline='') as f:
+        reader = csv.reader(f, delimiter = ';')
+        next(reader)
+        for row in reader:
+            employe = {}
+            for i in range (9):
+                employe[title[i]] = row[i]
+            dict_info['-'.join([row[1], row[2]])] = employe
+            tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["poste"],
+                                                employe["tel"],employe["number"], employe["adress"], employe["city"],employe["mail"])) 
+      
+
+def afficher(dict_info, tab_info):
+    for key in dict_info:
+        tab_info.insert("", 0, values=(dict_info[key]["login"],dict_info[key]["name"],dict_info[key]["firstname"],
+                                       dict_info[key]["poste"],dict_info[key]["tel"],dict_info[key]["number"], dict_info[key]["adress"], dict_info[key]["city"],dict_info[key]["mail"]))       
+
+def getPath():
+    application_path = ""
+    if getattr(sys, 'frozen', False):
+        application_path = sys._MEIPASS
+    elif __file__:
+        application_path = os.path.dirname(__file__)
+
+    return application_path
     
 
-  
-
+dict_info = {} 
 
 #crer fenetre
 window = Tk()
@@ -211,14 +243,14 @@ window.title("Qr Generateur")
 window.geometry("1200x800")
 window.minsize(480, 360)
 window.config(background="#FFFFFF")
-window.iconbitmap("ca.ico")
+
+window.iconbitmap(default=os.path.join(getPath(), "ca.ico"))
 
 #banderole 
-photo = PhotoImage(file='ca_banderole.png')
+photo = PhotoImage(file=os.path.join(getPath(), "ca_banderole.png"))
 label = Label(window, image=photo)    
 label.pack()
  
-
 #creer frame (boite)
 frame_1 = Frame(window, background="#FFFFFF")
 frame_2 = Frame(window,background="#006C50")
@@ -228,15 +260,11 @@ frame_5 = Frame(window,background="#D6D6D6")
 frame_open = Frame(window, background="#D6D6D6")
 frame_quitter = Frame(window,background="#FFFFFF")
 
-
-
 #frame qui affiche le csv
 frame_csv = Frame(window, bd=3,relief= GROOVE, bg="#FFFFFF", width=1150, height=550)
 frame_csv.pack_propagate(False)
 
-
 #Tableau qui stock le csv
-
 scroll_y = Scrollbar(frame_csv, orient=VERTICAL)
 scroll_x = Scrollbar(frame_csv, orient=HORIZONTAL)
 tab_info = ttk.Treeview(frame_csv, columns=("id" , "nom", "prenom", "poste", "telephone", "mobile", "adresse", "ville", "mail"), yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
@@ -244,7 +272,6 @@ scroll_y.config(command=tab_info.yview)
 scroll_y.pack(side=RIGHT, fill=Y)
 scroll_x.config(command=tab_info.xview)
 scroll_x.pack(side=BOTTOM, fill=X)
-
 
 tab_info.heading("id", text="Login")
 tab_info.heading("nom", text="Nom")
@@ -269,37 +296,9 @@ tab_info.column('#9', minwidth=0,width=300) #mail
 tab_info.pack(expand=YES, fill=BOTH)
 tab_info.bind("<ButtonRelease-1>")
 
-
-
-def dialog_box():
-    file = filedialog.askopenfilename()
-    champ_source.insert(0, file)
-
-    dict_info = {}
-    title = ["login", "name", "firstname", "poste", "tel", "number", "adress", "city", "mail"]
-    with open(file, newline='') as f:
-        reader = csv.reader(f, delimiter = ';')
-        next(reader)
-        for row in reader:
-            employe = {}
-            for i in range (9):
-                employe[title[i]] = row[i]
-            dict_info['-'.join([row[1], row[2]])] = employe
-            tab_info.insert("", 0, values=(employe["login"],employe["name"],employe["firstname"],employe["poste"],
-                                                employe["tel"],employe["number"], employe["adress"], employe["city"],employe["mail"])) 
-           
-
-def afficher(dict_info, tab_info):
-    for key in dict_info:
-        tab_info.insert("", 0, values=(dict_info[key]["login"],dict_info[key]["name"],dict_info[key]["firstname"],
-                                       dict_info[key]["poste"],dict_info[key]["tel"],dict_info[key]["number"], dict_info[key]["adress"], dict_info[key]["city"],dict_info[key]["mail"]))       
-       
-
-
 #affichage de la frame
 frame_1.pack()
 frame_quitter.pack()
-
 
 #creer les widgets (contenus dans la frame 1)
 label_title = Label(frame_1, text="Générateur de QR Code", font=("Arial", 27), background='#FFFFFF', fg='black')
@@ -307,9 +306,6 @@ label_title.pack()
 
 label_subtitle = Label(frame_1, text="Bienvenue sur le générateur de Qr Code, choisissez une option : ", font=("Arial", 15), bg='#FFFFFF', fg='black')
 label_subtitle.pack()
-
-
-
 
 #boutons frame 1
 bouton_1 = Button(frame_1, text="Générer un QR Code de contact   ", font=("Arial"), bg ='#006C50', fg='white', command=page_ouvrir)
@@ -321,11 +317,8 @@ bouton_4.pack(padx=10, pady=30,  ipadx=20, ipady=30)
 bouton_2 = Button(frame_1, text="Générer un QR Code événementiel", font=("Arial"), bg ='#006C50', fg='white', command=page_3)
 bouton_2.pack(padx=10, pady=40,  ipadx=20, ipady=30)
 
-
-
 bouton_3 = Button(frame_quitter, text="Quitter", font=("Arial"), bg ='#ED1C24', fg='white', command=window.quit)
 bouton_3.pack(ipadx=10, ipady=10)
-
 
 #frame ouvrir fichier
 txt_instruction = Label(frame_open, text="Veuillez sélectionnez une base", font=("Arial",20), bg="#D6D6D6", fg="black") 
@@ -336,7 +329,7 @@ txt_chemin.place(x=330, y=60)
 champ_source = Entry(frame_open)
 champ_source.place(x=180, y=95, width=450)
 
-bouton_ouvrir = Button(frame_open, text="Ouvrir fichier", font=("Arial"), bg ='#006C50', fg='white', command=dialog_box)
+bouton_ouvrir = Button(frame_open, text="Ouvrir fichier", font=("Arial"), bg ='#006C50', fg='white', command= lambda: dialog_box(dict_info))
 bouton_ouvrir.place(x=330, y=150)
 
 bouton_continuer = Button(frame_open, text="Continuer", font=("Arial"), bg ='#006C50', fg='white', command=page_2)
@@ -344,8 +337,6 @@ bouton_continuer.place(x=340, y=200)
 
 bouton_retour_2 = Button(frame_open, text="Retour menu", font=("Arial"), bg ='#ED1C24', fg='white', command=page_ouvrir_to1)
 bouton_retour_2.place(x=330, y=250)
-
-
 
 #boutons frame 2
 txt_id= Label(frame_2, text="Id", font=("Arial"), bg="#FFFFFF", fg="black")
@@ -363,12 +354,15 @@ txt_prenom.pack(padx=5, pady=15, side=LEFT)
 champ_prenom = Entry(frame_2)
 champ_prenom.pack(padx=10, pady=15, side=LEFT)
 
-bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white', command=search)
+txt_agence = Label(frame_2, text="Agence", font=("Arial"), bg="#FFFFFF", fg="black")
+txt_agence.pack(padx=5, pady=15, side=LEFT)
+champ_agence = Entry(frame_2)
+champ_agence.pack(padx=10, pady=15, side=LEFT)
+
+bouton_8 = Button(frame_2, text="Recherche", font=("Arial"), bg='#2BA640', fg='white', command=lambda: search(dict_info, tab_info))
 bouton_8.pack(padx=10, pady=15, side=LEFT)
 
-bouton_9 = Button(frame_2, text="Annuler", font=("Arial"), bg='#2BA640', fg='white', command=annuler_search)
-
-
+bouton_9 = Button(frame_2, text="Annuler", font=("Arial"), bg='#2BA640', fg='white', command=lambda: annuler_search(dict_info, tab_info))
 
 # frame 4
 bouton_5 = Button(frame_4, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_2to1)
@@ -376,7 +370,6 @@ bouton_5.pack(side=RIGHT)
 
 bouton_creer = Button(frame_4, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=QR_auto)
 bouton_creer.pack(side=LEFT)
-
 
 # frame 3
 txt_lien = Label(frame_3, text="Entrez le lien  : ", font=("Arial", 15), bg ='#D6D6D6', fg='black').place(x=340, y=100)
@@ -391,11 +384,7 @@ bouton_6 = Button(frame_3, text="Valider", font=("Arial"), bg ='#2BA640', fg='wh
 
 bouton_7 = Button(frame_3, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_3to1).place(x=450, y=350, width=100, height=50)
 
-
-
-
 # frame 5
-
 txt_titre = Label(frame_5, text="Entrez vos coordonnées pour générer un QR Code  :", font=("Arial", 20), bg="#D6D6D6", fg="black").place(x=50, y=30)
 
 txt_nom = Label(frame_5, text="Nom", font=("Arial"), bg="#D6D6D6", fg="black").place(x=50, y=90)
@@ -441,9 +430,5 @@ champ_LONGITUDE.place(x=600, y=280)
 bouton_creer2 = Button(frame_5, text="Creer", font=("Arial"), bg='#2BA640', fg='white', command=QR_manuel).place(x=400, y=400, width=100, height=50)
 
 bouton_7 = Button(frame_5, text="Retour", font=("Arial"), bg ='#ED1C24', fg='white', command=page_4to1).place(x=550, y=400, width=100, height=50)
-
-
-
-
 #affichage de la fenetre 
 window.mainloop()

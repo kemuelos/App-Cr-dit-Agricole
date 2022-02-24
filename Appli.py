@@ -8,6 +8,35 @@ from PIL import Image
 from segno import helpers
 
 
+def dialog_box(dict_info):
+    file = filedialog.askopenfilename()
+
+    if not file:
+        return
+
+    champ_source.insert(0, file)
+
+    title = ["login", "name", "firstname", "poste",
+             "tel", "number", "adress", "city", "mail"]
+
+    with open(file, newline='') as f:
+        reader = csv.reader(f, delimiter=';')
+        next(reader)
+        for row in reader:
+            employe = {}
+            for i in range(9):
+                employe[title[i]] = row[i]
+            dict_info['-'.join([row[1], row[2]])] = employe
+            tab_info.insert("", 0, values=(employe["login"], employe["name"], employe["firstname"], employe["poste"],
+                                           employe["tel"], employe["number"], employe["adress"], employe["city"], employe["mail"]))
+
+
+def afficher(dict_info, tab_info):
+    for key in dict_info:
+        tab_info.insert("", 0, values=(dict_info[key]["login"], dict_info[key]["name"], dict_info[key]["firstname"],
+                                       dict_info[key]["poste"], dict_info[key]["tel"], dict_info[key]["number"], dict_info[key]["adress"], dict_info[key]["city"], dict_info[key]["mail"]))
+
+
 # fonction pour passer à la page suivante
 def page_ouvrir():
     frame_open.place(x=200, y=100, width=800, height=300)
@@ -90,7 +119,7 @@ def QR_code():
     QRimg.paste(logo, pos)
 
     file = filedialog.asksaveasfilename(title="enregistrer sous...", defaultextension=".jpg", filetypes=[
-        ('png files', '.png'), ('jpg files', '.jpg')], initialfile='qr_code_contact\\'+'qr_contact_'+E+'.jpg')
+        ('png files', '.png'), ('jpg files', '.jpg')], initialfile='qr_contact_'+E+'.jpg')
 
     if not file:
         return
@@ -101,7 +130,7 @@ def QR_code():
     champ_E.delete(0, "end")
 
 
-def QR_auto():
+def QR_auto(tab_info):
     line = tab_info.item(tab_info.selection())
     Id = line['values'][0]
     Nom = line['values'][1] + ' ' + line['values'][2]
@@ -118,7 +147,7 @@ def QR_auto():
     qr_auto.designator
 
     file = filedialog.asksaveasfilename(
-        title="enregistrer sous...", defaultextension=".png", filetypes=[('png files', '.png'), ('jpg files', '.jpg')], initialfile='qr_code_contact\\'+'qr_contact_'+Id+'.png')
+        title="enregistrer sous...", defaultextension=".png", filetypes=[('png files', '.png'), ('jpg files', '.jpg')], initialfile='qr_contact_'+Id+'.png')
 
     if not file:
         return
@@ -141,7 +170,7 @@ def QR_manuel():
     qr_manu.designator
 
     file = filedialog.asksaveasfilename(
-        title="enregistrer sous...", defaultextension=".png", filetypes=[('png files', '.png'), ('jpg files', '.jpg')], initialfile='qr_code_contact\\'+'qr_contact_'+name_info+'.png'
+        title="enregistrer sous...", defaultextension=".png", filetypes=[('png files', '.png'), ('jpg files', '.jpg')], initialfile='qr_contact_'+name_info+'.png'
     )
 
     if not file:
@@ -161,26 +190,51 @@ def QR_manuel():
     champ_LONGITUDE.delete(0, "end")
 
 
-def search():
-    dict_info = {}
+def search(dict_info, tab_info):
     id_search = champ_id.get()
     nom_search = champ_nom.get()
     prenom_search = champ_prenom.get()
-    tab_info.delete(*tab_info.get_children())
 
-    if len(id_search) != 0:
-        for key in dict_info:
-            if dict_info[key]["login"] == id_search:
-                employe_search = dict_info[key]
+    print(id_search, nom_search, prenom_search)
 
-    tab_info.insert("", 0, values=(employe_search["login"], employe_search["name"], employe_search["firstname"], employe_search["poste"],
-                                   employe_search["tel"], employe_search["number"], employe_search["adress"], employe_search["city"], employe_search["mail"]))
+    trouve = False
+    employe_search = {}
 
-    bouton_9.pack(padx=10, pady=15, side=LEFT)
+    if id_search != "":
+        for employe in dict_info:
+            if id_search == dict_info[employe]['login']:
+                trouve = True
+                employe_search[employe] = dict_info[employe]
+
+    elif nom_search != '' and prenom_search != '':
+        for employe in dict_info:
+            if nom_search.lower() == dict_info[employe]['name'].lower() and prenom_search.lower() == dict_info[employe]['firstname'].lower():
+                trouve = True
+                employe_search[employe] = dict_info[employe]
+
+    elif nom_search != '':
+        for employe in dict_info:
+            if nom_search.lower() == dict_info[employe]['name'].lower():
+                trouve = True
+                employe_search[employe] = dict_info[employe]
+
+    elif prenom_search != '':
+        for employe in dict_info:
+            if prenom_search.lower() == dict_info[employe]['firstname'].lower():
+                trouve = True
+                employe_search[employe] = dict_info[employe]
+
+    if trouve:
+        champ_id.delete(0, "end")
+        champ_nom.delete(0, "end")
+        champ_prenom.delete(0, "end")
+
+        tab_info.delete(*tab_info.get_children())
+        afficher(employe_search, tab_info)
+        bouton_9.pack(padx=10, pady=15, side=LEFT)
 
 
-def annuler_search():
-    dict_info = {}
+def annuler_search(dict_info, tab_info):
     bouton_9.pack_forget()
     afficher(dict_info, tab_info)
 
@@ -195,6 +249,8 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
+
+dict_info = {}
 
 # crer fenetre
 window = Tk()
@@ -262,35 +318,6 @@ tab_info.pack(expand=YES, fill=BOTH)
 tab_info.bind("<ButtonRelease-1>")
 
 
-def dialog_box():
-    file = filedialog.askopenfilename()
-
-    if not file:
-        return
-
-    champ_source.insert(0, file)
-
-    dict_info = {}
-    title = ["login", "name", "firstname", "poste",
-             "tel", "number", "adress", "city", "mail"]
-    with open(file, newline='') as f:
-        reader = csv.reader(f, delimiter=';')
-        next(reader)
-        for row in reader:
-            employe = {}
-            for i in range(9):
-                employe[title[i]] = row[i]
-            dict_info['-'.join([row[1], row[2]])] = employe
-            tab_info.insert("", 0, values=(employe["login"], employe["name"], employe["firstname"], employe["poste"],
-                                           employe["tel"], employe["number"], employe["adress"], employe["city"], employe["mail"]))
-
-
-def afficher(dict_info, tab_info):
-    for key in dict_info:
-        tab_info.insert("", 0, values=(dict_info[key]["login"], dict_info[key]["name"], dict_info[key]["firstname"],
-                                       dict_info[key]["poste"], dict_info[key]["tel"], dict_info[key]["number"], dict_info[key]["adress"], dict_info[key]["city"], dict_info[key]["mail"]))
-
-
 # affichage de la frame
 frame_1.pack()
 frame_quitter.pack()
@@ -337,7 +364,7 @@ champ_source = Entry(frame_open)
 champ_source.place(x=180, y=95, width=450)
 
 bouton_ouvrir = Button(frame_open, text="Ouvrir fichier", font=(
-    "Arial"), bg='#006C50', fg='white', command=dialog_box)
+    "Arial"), bg='#006C50', fg='white', command=lambda: dialog_box(dict_info))
 bouton_ouvrir.place(x=330, y=150)
 
 bouton_continuer = Button(frame_open, text="Continuer", font=(
@@ -367,11 +394,11 @@ champ_prenom = Entry(frame_2)
 champ_prenom.pack(padx=10, pady=15, side=LEFT)
 
 bouton_8 = Button(frame_2, text="Recherche", font=("Arial"),
-                  bg='#2BA640', fg='white', command=search)
+                  bg='#2BA640', fg='white', command=lambda: search(dict_info, tab_info))
 bouton_8.pack(padx=10, pady=15, side=LEFT)
 
 bouton_9 = Button(frame_2, text="Annuler", font=("Arial"),
-                  bg='#2BA640', fg='white', command=annuler_search)
+                  bg='#2BA640', fg='white', command=lambda: annuler_search(dict_info, tab_info))
 
 
 # frame 4
@@ -380,7 +407,7 @@ bouton_5 = Button(frame_4, text="Retour", font=("Arial"),
 bouton_5.pack(side=RIGHT)
 
 bouton_creer = Button(frame_4, text="Creer", font=(
-    "Arial"), bg='#2BA640', fg='white', command=QR_auto)
+    "Arial"), bg='#2BA640', fg='white', command=lambda: QR_auto(tab_info))
 bouton_creer.pack(side=LEFT)
 
 
